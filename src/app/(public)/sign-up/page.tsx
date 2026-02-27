@@ -1,83 +1,47 @@
 'use client';
 
-import Link from 'next/link';
-import { useState } from 'react';
-import Card from '@/components/global/Card';
-import Button from '@/components/global/Button';
-import Input from '@/components/global/Input';
+import { SignUp } from '@clerk/nextjs';
 
-export default function SignUp() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    // TODO: Implement sign-up with Clerk
-    setTimeout(() => setLoading(false), 1000);
-  };
-
+/**
+ * Sign-up page using Clerk
+ * 
+ * Features:
+ * - Email verification handled automatically by Clerk
+ * - All verification routes (/verify-email-address, etc.) managed internally
+ * - Redirects to /dashboard after successful account creation
+ * - User data synced to database via useSyncUser hook in protected layout
+ */
+export default function SignUpPage() {
   return (
-    <Card className="w-full max-w-md">
-      <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 px-4">
+      <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-white mb-2">Get Started</h1>
-          <p className="text-gray-400">Create your Productivity OS account</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent mb-2">
+            AI Productivity OS
+          </h1>
+          <p className="text-gray-400">Start your productivity journey today</p>
         </div>
-
-        <Input
-          label="Full Name"
-          type="text"
-          placeholder="John Doe"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
+        
+        <SignUp 
+          afterSignUpUrl="/dashboard"
+          signInUrl="/sign-in"
+          appearance={{
+            elements: {
+              rootBox: 'w-full',
+              card: 'bg-gray-900 border border-gray-800 shadow-2xl',
+              headerTitle: 'text-2xl font-bold text-white',
+              headerSubtitle: 'text-gray-400',
+              socialButtonsBlockButton: 'border-gray-700 hover:bg-gray-800',
+              formButtonPrimary: 'bg-blue-600 hover:bg-blue-700',
+              footerActionLink: 'text-blue-400 hover:text-blue-300',
+              dividerLine: 'bg-gray-700',
+              dividerText: 'text-gray-400',
+              formFieldInput: 'bg-gray-800 border-gray-700 text-white',
+              formFieldLabel: 'text-gray-300',
+            },
+          }}
         />
-
-        <Input
-          label="Email"
-          type="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-
-        <Input
-          label="Password"
-          type="password"
-          placeholder="••••••••"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-
-        <Button type="submit" variant="primary" size="lg" className="w-full" isLoading={loading}>
-          Create Account
-        </Button>
-
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-700" />
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-gray-900 text-gray-400">Or</span>
-          </div>
-        </div>
-
-        <Button variant="secondary" size="lg" className="w-full">
-          Sign up with Google
-        </Button>
-
-        <p className="text-center text-gray-400">
-          Already have an account?{' '}
-          <Link href="/sign-in" className="text-blue-400 hover:text-blue-300">
-            Sign in
-          </Link>
-        </p>
-      </form>
-    </Card>
+      </div>
+    </div>
   );
 }

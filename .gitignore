@@ -7,3 +7,4 @@ coverage/
 /.turbo
 *.log
 .DS_Storenext-env.d.ts
+/generated/prisma

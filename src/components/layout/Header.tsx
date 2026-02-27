@@ -1,27 +1,37 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useUser, useClerk } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/global/Button';
 
 interface HeaderProps {
-  userName?: string;
   onMenuToggle?: () => void;
   sidebarOpen?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ userName = 'User', onMenuToggle, sidebarOpen = false }) => {
-  const router = useRouter();
+/**
+ * Header Component
+ * 
+ * Displays user information from Clerk and handles sign-out.
+ * Uses useUser() hook to get authenticated user data from Clerk.
+ */
+const Header: React.FC<HeaderProps> = ({ onMenuToggle, sidebarOpen = false }) => {
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const { user, isLoaded } = useUser();
+  const { signOut } = useClerk();
+  const router = useRouter();
 
-  const handleLogout = () => {
-    // TODO: Implement logout with Clerk
-    router.push('/sign-in');
-  };
+  // Extract user display name
+  const displayName = user?.firstName || user?.fullName || (user?.primaryEmailAddress?.emailAddress?.split('@')[0] || 'User');
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
     // TODO: Implement theme toggle
+  };
+
+  const handleLogout = async () => {
+    await signOut(() => router.push('/'));
   };
 
   return (
@@ -67,17 +77,19 @@ const Header: React.FC<HeaderProps> = ({ userName = 'User', onMenuToggle, sideba
           </button>
 
           {/* User menu */}
-          <div className="flex items-center gap-3 pl-4 border-l border-gray-800">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium text-white">{userName}</p>
-              <p className="text-xs text-gray-500">Premium</p>
+          {isLoaded && (
+            <div className="flex items-center gap-3 pl-4 border-l border-gray-800">
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-medium text-white">{displayName}</p>
+                <p className="text-xs text-gray-500">Premium</p>
+              </div>
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold">
+                {displayName.charAt(0).toUpperCase()}
+              </div>
             </div>
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold">
-              {userName.charAt(0).toUpperCase()}
-            </div>
-          </div>
+          )}
 
-          {/* Logout button */}
+          {/* Sign out button */}
           <Button variant="ghost" size="sm" onClick={handleLogout}>
             Logout
           </Button>

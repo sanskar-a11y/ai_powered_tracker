@@ -1,6 +1,7 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { ReactNode } from 'react'
+import { ClerkProvider } from '@clerk/nextjs'
 
 export const metadata: Metadata = {
   title: 'AI Productivity OS',
@@ -10,10 +11,22 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body className="bg-gray-950 text-gray-100 antialiased">
-        {children}
-      </body>
-    </html>
+    <ClerkProvider
+      appearance={{
+        baseTheme: undefined,
+        variables: {
+          colorPrimary: '#2563eb',
+          colorBackground: '#0f172a',
+          colorInputBackground: '#1e293b',
+          colorInputText: '#f1f5f9',
+        },
+      }}
+    >
+      <html lang="en">
+        <body className="bg-gray-950 text-gray-100 antialiased">
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }

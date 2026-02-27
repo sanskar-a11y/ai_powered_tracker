@@ -1,0 +1,185 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Clerk User - unique identifier from Clerk authentication
+// clerkId is the primary identifier linked to Clerk
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique // Unique Clerk user ID
+  email     String   @unique
+  name      String?
+  avatar    String?
+  bio       String?
+  
+  // User Preferences
+  theme     String   @default("dark")
+  timezone  String   @default("UTC")
+  emailNotifications Boolean @default(true)
+  
+  // Relations
+  tasks     Task[]
+  habits    Habit[]
+  sessions  FocusSession[]
+  dailyStats DailyStats[]
+  aiReports AIReport[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clerkId])
+  @@index([email])
+}
+
+// Task model for productivity tracking
+model Task {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title       String
+  description String?
+  status      TaskStatus @default(TODO)
+  priority    Priority   @default(MEDIUM)
+  category    String?    // e.g., "Work", "Personal", "Health"
+  tags        String[]   @default([])
+  
+  dueDate     DateTime?
+  completedAt DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([completedAt])
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+  ARCHIVED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// Habit model for habit tracking
+model Habit {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name        String
+  description String?
+  frequency   Frequency @default(DAILY)
+  icon        String?   // emoji or icon name
+  color       String?   // hex color
+  goal        Int      @default(1) // How many times per frequency period
+  isActive    Boolean   @default(true)
+  
+  streakCount Int       @default(0)
+  bestStreak  Int       @default(0)
+  totalDays   Int       @default(0)
+  lastLoggedAt DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isActive])
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+// Focus Session model for deep work tracking
+model FocusSession {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  title       String
+  duration    Int       // in minutes
+  focusMode   String   @default("Deep Work") // e.g., "Pomodoro", "Deep Work"
+  
+  startedAt   DateTime
+  endedAt     DateTime?
+  
+  notes       String?
+  isCompleted Boolean   @default(false)
+  distractions Int      @default(0) // Number of interruptions
+  tags        String[]  @default([])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([startedAt])
+  @@index([isCompleted])
+}
+
+// Daily aggregated statistics for performance dashboard
+model DailyStats {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  date            DateTime // Date without time component
+  
+  tasksCompleted  Int      @default(0)
+  habitsCompleted Int      @default(0)
+  focusMinutes    Int      @default(0)
+  
+  productivityScore Float  @default(0) // 0-100
+  mood            String?  // "great", "good", "okay", "bad", "terrible"
+  notes           String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+}
+
+// AI-generated weekly reports
+model AIReport {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  weekStart       DateTime
+  weekEnd         DateTime
+  
+  summary         String   // Main summary text
+  strengths       String[] // Array of strength points
+  improvements    String[] // Array of improvement areas
+  suggestions     String[] // Array of actionable suggestions
+  
+  productivityScore Float
+  totalFocusHours Float
+  habitsCompleted Int
+  tasksCompleted  Int
+  
+  createdAt       DateTime @default(now())
+  
+  @@index([userId])
+  @@index([weekStart])
+}
