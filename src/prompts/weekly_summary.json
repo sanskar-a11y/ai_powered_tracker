@@ -1,0 +1,5 @@
+{
+  "id": "weekly_summary",
+  "description": "Prompt template for generating a weekly summary. Output MUST be strict JSON.",
+  "template": "{\"summary\": \"<short summary>\", \"highlights\": [<items>], \"suggestions\": [<items>] }"
+}
