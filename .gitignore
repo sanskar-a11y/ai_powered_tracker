@@ -6,4 +6,4 @@ dist/
 coverage/
 /.turbo
 *.log
-.DS_Store
+.DS_Storenext-env.d.ts
